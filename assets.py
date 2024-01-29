@@ -64,6 +64,9 @@ def carrega_arquivos():
     sheepDog_images = [all_sprites[i] for i in [0, 2, 5, 7, 8, 10, 13, 15]]
     mop_images = [all_sprites[i] for i in [1, 3, 4, 6, 9, 11, 12, 14]]
 
+    #Armazena som
+    dicionario_de_arquivos['som']=pygame.mixer.Sound(os.path.join(SND_DIR, 'wah-wah.wav'))
+
     # Armazenar as listas no dicionário sob as chaves 'sheepDog' e 'Mop'
     dicionario_de_arquivos['sheepDog'] = sheepDog_images
     dicionario_de_arquivos['Mop'] = mop_images
