@@ -18,78 +18,87 @@ def sorteia_imagem(sheepDog_images, mop_images):
 
 # Função principal do jogo
 def game_screen(window):
+    # Inicialização do relógio para controle de FPS
     clock = pygame.time.Clock()
 
-    # Carrega as imagens de Cachorro e Mop
+    # Carrega os arquivos de imagem e som
     dicionario_de_arquivos = carrega_arquivos()
     sheepDog_images = dicionario_de_arquivos['sheepDog']
     mop_images = dicionario_de_arquivos['Mop']
 
-    # Estados do jogo e inicialização da contagem de vidas
+    # Definição dos estados do jogo
     DONE = 0
     PLAYING = 1
     state = PLAYING
-    vidas = 3
 
-    # Fonte para renderizar a quantidade de vidas
-    fonte = pygame.font.Font(None, 36)
-
-    # Lista para armazenar imagens sorteadas
+    # Lista para armazenar as imagens sorteadas
     imagens_sorteadas = []
 
-    # Sorteia as primeiras 5 imagens
-    for _ in range(5):
-        imagem_sort = sorteia_imagem(sheepDog_images, mop_images)
-        imagens_sorteadas.append(imagem_sort)
+    # Variáveis para controlar vidas e pontuação
+    vidas = 3
+    segundos = 0
 
-    # Efeito sonoro
+    # Fonte para renderizar texto na tela
+    fonte = pygame.font.Font(None, 36)
+
+    # Carrega efeito sonoro
     efeito_sonoro = pygame.mixer.Sound('assets/snd/efeito_sonoro.wav')
 
-    # Loop principal do jogo
     while state != DONE:
+        # Limita o jogo a uma taxa de FPS (Frames Per Second)
         clock.tick(FPS)
 
-        # Tratamento de eventos (fechar janela, clique do mouse)
+        # Trata eventos
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 state = DONE
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                # Verifica se o jogador clicou em alguma imagem
                 mx, my = pygame.mouse.get_pos()
                 for img in imagens_sorteadas[:]:
                     if colisao_ponto_retangulo(mx, my, img['x'], img['y'], img['imagem'].get_width(), img['imagem'].get_height()):
-                        if not img['eh_cachorro']:  # Se o jogador clicar em um Mop, toca o efeito sonoro
+                        if not img['eh_cachorro']:
                             efeito_sonoro.play()
                             vidas -= 1
-                        imagens_sorteadas.remove(img)  # Remove a imagem clicada
-                        for _ in range(2):  # Adiciona duas novas imagens
+                        imagens_sorteadas.remove(img)
+                        for _ in range(2):
                             imagem_sort = sorteia_imagem(sheepDog_images, mop_images)
                             imagens_sorteadas.append(imagem_sort)
                         break
 
-        # Verifica se alguma imagem de Cachorro saiu da tela e remove-a, perdendo uma vida
+        # Verifica se imagens de Cachorro saíram da tela
         for img in imagens_sorteadas[:]:
             if img['y'] > HEIGHT and img['eh_cachorro']:
                 imagens_sorteadas.remove(img)
                 vidas -= 1
-                for _ in range(2):  # Adiciona duas novas imagens
+                for _ in range(2):
                     imagem_sort = sorteia_imagem(sheepDog_images, mop_images)
                     imagens_sorteadas.append(imagem_sort)
 
-        # Preenche a tela e desenha as imagens sorteadas
+        # Atualiza a contagem de segundos
+        segundos += 1
+
+        # Preenche a tela com a cor preta
         window.fill(BLACK)
+
+        # Desenha as imagens sorteadas na tela
         for img in imagens_sorteadas:
-            img['y'] += img['velocidade']  # Move a imagem para baixo
+            img['y'] += img['velocidade']  # Atualiza a posição y
             window.blit(img['imagem'], (img['x'], img['y']))
 
         # Renderiza a quantidade de vidas no canto superior direito
-        vidas_texto = fonte.render(f'Vidas: {vidas}', True, (255, 255, 255))
-        window.blit(vidas_texto, (WIDTH - vidas_texto.get_width() - 10, 10))
+        vidas_text = fonte.render(f'Vidas: {vidas}', True, (255, 255, 255))
+        window.blit(vidas_text, (WIDTH - vidas_text.get_width() - 10, 10))
+
+        # Renderiza a pontuação no canto superior esquerdo
+        pontuacao_text = fonte.render(f'Pontuação: {segundos}', True, (255, 255, 255))
+        window.blit(pontuacao_text, (10, 10))
 
         # Atualiza a tela
         pygame.display.update()
 
-        # Verifica se o jogador ainda tem vidas
+        # Verifica se o jogador perdeu todas as vidas
         if vidas <= 0:
-            state = DONE  # Encerra o jogo se o jogador ficar sem vidas
+            state = DONE
 
     return state
