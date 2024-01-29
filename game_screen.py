@@ -2,6 +2,10 @@ import pygame
 import random
 from config import FPS, WIDTH, HEIGHT, BLACK
 from assets import carrega_arquivos
+# Importação do módulo sys para interagir com o sistema e controlar o programa
+import sys
+# Importação do módulo os para funções relacionadas ao sistema operacional
+import os
 
 # Função para verificar colisão entre ponto (clique do mouse) e retângulo (imagem)
 def colisao_ponto_retangulo(px, py, rx, ry, rw, rh):
@@ -81,5 +85,80 @@ def game_screen(window):
 
         if vidas <= 0:
             state = DONE  # Termina o jogo se o jogador perder todas as vidas
+            tela_pos_jogo(window, segundos)  # Chama a tela pós-jogo com a pontuação final
+            atualiza_ranking(segundos)  # Atualiza o ranking com a pontuação do jogador
 
     return state
+
+def tela_pos_jogo(window, pontuacao):
+    fonte = pygame.font.Font(None, 48)
+    texto = fonte.render(f'Pontuação Final: {pontuacao}', True, (255, 255, 255))
+    texto_rect = texto.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        
+        window.fill(BLACK)
+        window.blit(texto, texto_rect)
+        pygame.display.flip()
+
+# Caminho para o arquivo de ranking
+ARQUIVO_RANKING = "ranking.txt"
+
+def mostra_ranking(window):
+    fonte = pygame.font.Font(None, 24)
+
+    # Verifica se o arquivo de ranking existe
+    if os.path.exists(ARQUIVO_RANKING):
+        with open(ARQUIVO_RANKING, "r") as arquivo:
+            ranking = arquivo.readlines()
+    else:
+        ranking = []
+
+    # Ordena o ranking pelo número de segundos (pontuação)
+    ranking.sort(key=lambda x: int(x.split(":")[1]))
+
+    # Limita a exibição aos 10 melhores jogadores
+    ranking = ranking[:10]
+
+    # Renderiza o ranking na tela
+    y = 100
+    for i, linha in enumerate(ranking, start=1):
+        nome, pontuacao = linha.strip().split(":")
+        texto = fonte.render(f"{i}. {nome}: {pontuacao} segundos", True, (255, 255, 255))
+        texto_rect = texto.get_rect(center=(WIDTH // 2, y))
+        window.blit(texto, texto_rect)
+        y += 30
+
+    pygame.display.flip()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+def atualiza_ranking(pontuacao):
+    # Verifica se o arquivo de ranking existe
+    if os.path.exists(ARQUIVO_RANKING):
+        with open(ARQUIVO_RANKING, "r") as arquivo:
+            ranking = arquivo.readlines()
+    else:
+        ranking = []
+
+    # Adiciona a nova pontuação à lista de ranking
+    nome_jogador = input("Digite seu nome: ")
+    ranking.append(f"{nome_jogador}:{pontuacao}\n")
+
+    # Ordena o ranking pelo número de segundos (pontuação)
+    ranking.sort(key=lambda x: int(x.split(":")[1]))
+
+    # Limita a lista aos 10 melhores jogadores
+    ranking = ranking[:10]
+
+    # Salva o ranking atualizado no arquivo
+    with open(ARQUIVO_RANKING, "w") as arquivo:
+        arquivo.writelines(ranking)
