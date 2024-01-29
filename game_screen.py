@@ -31,6 +31,9 @@ def game_screen(window):
     state = PLAYING
     vidas = 3
 
+    # Fonte para renderizar a quantidade de vidas
+    fonte = pygame.font.Font(None, 36)
+
     # Lista para armazenar imagens sorteadas
     imagens_sorteadas = []
 
@@ -64,6 +67,10 @@ def game_screen(window):
         for img in imagens_sorteadas:
             img['y'] += img['velocidade']  # Move a imagem para baixo
             window.blit(img['imagem'], (img['x'], img['y']))
+
+        # Renderiza a quantidade de vidas no canto superior direito
+        vidas_texto = fonte.render(f'Vidas: {vidas}', True, (255, 255, 255))
+        window.blit(vidas_texto, (WIDTH - vidas_texto.get_width() - 10, 10))
 
         # Atualiza a tela
         pygame.display.update()
