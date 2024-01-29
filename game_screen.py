@@ -42,6 +42,9 @@ def game_screen(window):
         imagem_sort = sorteia_imagem(sheepDog_images, mop_images)
         imagens_sorteadas.append(imagem_sort)
 
+    # Efeito sonoro
+    efeito_sonoro = pygame.mixer.Sound('assets/snd/efeito_sonoro.wav')
+
     # Loop principal do jogo
     while state != DONE:
         clock.tick(FPS)
@@ -54,13 +57,23 @@ def game_screen(window):
                 mx, my = pygame.mouse.get_pos()
                 for img in imagens_sorteadas[:]:
                     if colisao_ponto_retangulo(mx, my, img['x'], img['y'], img['imagem'].get_width(), img['imagem'].get_height()):
-                        if not img['eh_cachorro']:  # Se o jogador clicar em um Mop, perde uma vida
+                        if not img['eh_cachorro']:  # Se o jogador clicar em um Mop, toca o efeito sonoro
+                            efeito_sonoro.play()
                             vidas -= 1
                         imagens_sorteadas.remove(img)  # Remove a imagem clicada
                         for _ in range(2):  # Adiciona duas novas imagens
-                            nova_imagem = sorteia_imagem(sheepDog_images, mop_images)
-                            imagens_sorteadas.append(nova_imagem)
+                            imagem_sort = sorteia_imagem(sheepDog_images, mop_images)
+                            imagens_sorteadas.append(imagem_sort)
                         break
+
+        # Verifica se alguma imagem de Cachorro saiu da tela e remove-a, perdendo uma vida
+        for img in imagens_sorteadas[:]:
+            if img['y'] > HEIGHT and img['eh_cachorro']:
+                imagens_sorteadas.remove(img)
+                vidas -= 1
+                for _ in range(2):  # Adiciona duas novas imagens
+                    imagem_sort = sorteia_imagem(sheepDog_images, mop_images)
+                    imagens_sorteadas.append(imagem_sort)
 
         # Preenche a tela e desenha as imagens sorteadas
         window.fill(BLACK)
